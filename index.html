@@ -3,28 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Form Operator Unit</title>
+  <title>Form Pemeriksaan Operator</title>
+  <link rel="manifest" href="manifest.json">
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
+      background: #f5f5f5;
       max-width: 600px;
       margin: auto;
-      background-color: #f8f9fa;
     }
-
     h2 {
       text-align: center;
       margin-bottom: 20px;
     }
-
     label {
-      display: block;
       margin-top: 15px;
+      display: block;
       font-weight: bold;
     }
-
-    input, select {
+    input, select, button {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
@@ -32,121 +30,102 @@
       border: 1px solid #ccc;
       border-radius: 5px;
     }
-
-    .radio-group {
+    .group {
+      margin-top: 15px;
+    }
+    .btn-toggle {
       display: flex;
-      justify-content: space-around;
-      margin-top: 10px;
+      justify-content: space-between;
     }
-
-    .radio-group label {
-      font-weight: normal;
-    }
-
-    button {
-      margin-top: 20px;
-      width: 100%;
+    .btn-toggle button {
+      width: 48%;
       padding: 12px;
-      background-color: #007bff;
-      color: white;
-      border: none;
       font-size: 16px;
-      border-radius: 5px;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
     }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    .hasil {
+    .good { background-color: #28a745; color: white; }
+    .bad { background-color: #dc3545; color: white; }
+    .selected { outline: 3px solid black; }
+    #status {
       margin-top: 20px;
       text-align: center;
-      font-size: 16px;
-      color: green;
-      font-weight: bold;
-    }
-
-    fieldset {
-      margin-top: 20px;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    legend {
       font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h2>Form Pemeriksaan Operator Unit</h2>
+  <h2>Form Pemeriksaan Operator</h2>
 
-  <label for="nama">Nama Operator</label>
-  <input type="text" id="nama" placeholder="Contoh: Budi" />
+  <label>Nama Operator</label>
+  <input type="text" id="nama" />
 
-  <label for="model">Model Unit</label>
-  <input type="text" id="model" placeholder="Contoh: UD Quester" />
+  <label>Model Unit</label>
+  <input type="text" id="model" />
 
-  <label for="kode">Kode Unit</label>
-  <input type="text" id="kode" placeholder="Contoh: UD01" />
+  <label>Kode Unit</label>
+  <input type="text" id="kode" />
 
-  <label for="hm">HM Unit</label>
-  <input type="number" id="hm" placeholder="Contoh: 1234" />
+  <label>HM Unit</label>
+  <input type="number" id="hm" />
 
-  <label for="tanggal">Hari / Tanggal</label>
+  <label>Hari/Tanggal</label>
   <input type="date" id="tanggal" />
 
-  <label for="shift">Shift</label>
+  <label>Shift</label>
   <select id="shift">
     <option value="Pagi">Pagi</option>
-    <option value="Siang">Siang</option>
     <option value="Malam">Malam</option>
   </select>
 
-  <fieldset>
-    <legend>Pemeriksaan Track</legend>
-    <div class="radio-group">
-      <label><input type="radio" name="track" value="Good" checked /> Good</label>
-      <label><input type="radio" name="track" value="Bad" /> Bad</label>
+  <div class="group">
+    <label>Pemeriksaan Track</label>
+    <div class="btn-toggle" id="track-group">
+      <button class="good" onclick="selectOption('track','Good', this)">Good</button>
+      <button class="bad" onclick="selectOption('track','Bad', this)">Bad</button>
     </div>
-  </fieldset>
+  </div>
 
-  <fieldset>
-    <legend>Pemeriksaan Attachment</legend>
-    <div class="radio-group">
-      <label><input type="radio" name="attachment" value="Good" checked /> Good</label>
-      <label><input type="radio" name="attachment" value="Bad" /> Bad</label>
+  <div class="group">
+    <label>Pemeriksaan Attachment</label>
+    <div class="btn-toggle" id="attachment-group">
+      <button class="good" onclick="selectOption('attachment','Good', this)">Good</button>
+      <button class="bad" onclick="selectOption('attachment','Bad', this)">Bad</button>
     </div>
-  </fieldset>
+  </div>
 
-  <fieldset>
-    <legend>Pemeriksaan Engine</legend>
-    <div class="radio-group">
-      <label><input type="radio" name="engine" value="Good" checked /> Good</label>
-      <label><input type="radio" name="engine" value="Bad" /> Bad</label>
+  <div class="group">
+    <label>Pemeriksaan Engine</label>
+    <div class="btn-toggle" id="engine-group">
+      <button class="good" onclick="selectOption('engine','Good', this)">Good</button>
+      <button class="bad" onclick="selectOption('engine','Bad', this)">Bad</button>
     </div>
-  </fieldset>
+  </div>
 
-  <fieldset>
-    <legend>Pemeriksaan Hydraulic System</legend>
-    <div class="radio-group">
-      <label><input type="radio" name="hydraulic" value="Good" checked /> Good</label>
-      <label><input type="radio" name="hydraulic" value="Bad" /> Bad</label>
+  <div class="group">
+    <label>Pemeriksaan Hydraulic System</label>
+    <div class="btn-toggle" id="hydraulic-group">
+      <button class="good" onclick="selectOption('hydraulic','Good', this)">Good</button>
+      <button class="bad" onclick="selectOption('hydraulic','Bad', this)">Bad</button>
     </div>
-  </fieldset>
+  </div>
 
-  <button onclick="kirimData()">Kirim</button>
-
-  <div class="hasil" id="status"></div>
+  <button onclick="kirimData()">Kirim ke Spreadsheet</button>
+  <div id="status"></div>
 
   <script>
-    function getRadioValue(name) {
-      const radios = document.getElementsByName(name);
-      for (let i = 0; i < radios.length; i++) {
-        if (radios[i].checked) return radios[i].value;
-      }
-      return null;
+    let pemeriksaan = {
+      track: 'Good',
+      attachment: 'Good',
+      engine: 'Good',
+      hydraulic: 'Good'
+    };
+
+    function selectOption(field, value, el) {
+      pemeriksaan[field] = value;
+      document.querySelectorAll(`#${field}-group button`).forEach(btn => btn.classList.remove('selected'));
+      el.classList.add('selected');
     }
 
     function kirimData() {
@@ -157,29 +136,35 @@
         hm: document.getElementById("hm").value,
         tanggal: document.getElementById("tanggal").value,
         shift: document.getElementById("shift").value,
-        track: getRadioValue("track"),
-        attachment: getRadioValue("attachment"),
-        engine: getRadioValue("engine"),
-        hydraulic: getRadioValue("hydraulic")
+        track: pemeriksaan.track,
+        attachment: pemeriksaan.attachment,
+        engine: pemeriksaan.engine,
+        hydraulic: pemeriksaan.hydraulic
       };
 
-      if (!data.nama || !data.model || !data.kode || !data.hm || !data.tanggal) {
-        document.getElementById("status").innerText = "Silakan lengkapi semua field.";
-        return;
-      }
+      fetch("https://script.google.com/macros/s/AKfycbweOyyr_b33tABW0qnMioUk3e86OpwE8tuntCiY6MiysVDITRsMbHsnngIUuK1oh-tDBQ/exec", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" },
+      })
+      .then(res => res.text())
+      .then(txt => {
+        document.getElementById("status").innerText = "Berhasil dikirim!";
+        document.getElementById("nama").value = "";
+        document.getElementById("model").value = "";
+        document.getElementById("kode").value = "";
+        document.getElementById("hm").value = "";
+        document.getElementById("tanggal").value = "";
+      })
+      .catch(err => {
+        document.getElementById("status").innerText = "Gagal mengirim: " + err;
+      });
+    }
 
-      console.log(data); // bisa diganti untuk kirim ke server atau spreadsheet
-
-      document.getElementById("status").innerText = "Data berhasil dikirim!";
-
-      // Reset form
-      document.getElementById("nama").value = "";
-      document.getElementById("model").value = "";
-      document.getElementById("kode").value = "";
-      document.getElementById("hm").value = "";
-      document.getElementById("tanggal").value = "";
-      document.getElementById("shift").value = "Pagi";
-      document.querySelectorAll("input[type=radio][value=Good]").forEach(r => r.checked = true);
+    // PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker registered'));
     }
   </script>
 </body>
