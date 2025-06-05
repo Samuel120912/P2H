@@ -12,9 +12,14 @@
     h1 { color: #2196f3; }
     label { display: block; margin-top: 10px; }
     input, select, button { padding: 8px; width: 100%; margin-top: 5px; }
-    .goodbad { display: flex; justify-content: space-between; gap: 10px; }
-    .goodbad button { flex: 1; padding: 10px; cursor: pointer; border: 1px solid #2196f3; background: white; color: #2196f3; transition: 0.3s; }
-    .goodbad button.active {
+    .goodbad, .shift-buttons { display: flex; justify-content: space-between; gap: 10px; }
+    .goodbad button, .shift-buttons button {
+      flex: 1; padding: 10px; cursor: pointer;
+      border: 1px solid #2196f3; background: white; color: #2196f3;
+      transition: 0.3s;
+      user-select: none;
+    }
+    .goodbad button.active, .shift-buttons button.active {
       background-color: #2196f3;
       color: white;
     }
@@ -28,6 +33,7 @@
     }
     #downloadExcel {
       background-color: #4caf50; /* hijau untuk beda tombol */
+      width: 100%;
     }
   </style>
 </head>
@@ -39,13 +45,13 @@
     <label>Kode Unit: <input type="text" name="kode" required /></label>
     <label>HM Unit: <input type="number" name="hm" required /></label>
     <label>Hari/Tanggal: <input type="date" name="tanggal" required /></label>
-    <label>Shift:
-      <select name="shift" required>
-        <option value="">-- Pilih Shift --</option>
-        <option value="Pagi">Pagi</option>
-        <option value="Malam">Malam</option>
-      </select>
-    </label>
+
+    <label>Shift:</label>
+    <div class="shift-buttons">
+      <button type="button" data-group="shift" onclick="setValue('shift', 'Pagi', event)">Pagi</button>
+      <button type="button" data-group="shift" onclick="setValue('shift', 'Malam', event)">Malam</button>
+    </div>
+    <input type="hidden" name="shift" id="shift" required />
 
     <label>Pemeriksaan Track:</label>
     <div class="goodbad">
@@ -75,13 +81,17 @@
     </div>
     <input type="hidden" name="hydraulic" id="hydraulic" required />
 
-    <button type="submit">Kirim ke Spreadsheet</button>
-    <button type="button" id="downloadExcel">Download Excel</button>
+    <button type="submit">Tambah Data</button>
   </form>
+
+  <button id="downloadExcel">Download Semua Data Excel</button>
 
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
   <script>
+    // Array untuk menyimpan semua data yang diinput
+    const allData = [];
+
     function setValue(id, value, event) {
       document.getElementById(id).value = value;
 
@@ -99,67 +109,61 @@
       e.preventDefault();
       const form = e.target;
 
-      // validasi manual hidden inputs agar tidak kosong
-      const requiredFields = ['track', 'attachment', 'engine', 'hydraulic'];
+      // validasi hidden inputs
+      const requiredFields = ['shift', 'track', 'attachment', 'engine', 'hydraulic'];
       for (const field of requiredFields) {
         if (!document.getElementById(field).value) {
-          alert(`Harap pilih opsi untuk Pemeriksaan ${field.charAt(0).toUpperCase() + field.slice(1)}`);
+          alert(`Harap pilih opsi untuk ${field.charAt(0).toUpperCase() + field.slice(1)}`);
           return;
         }
       }
 
+      // Ambil data dari form
       const data = Object.fromEntries(new FormData(form).entries());
 
-      fetch("https://script.google.com/macros/s/AKfycbxi29S-7QquVFHiPQZIiqBhOkTZuiUS-11dWFY0SMaUvph5fXtQYO97YoublthFGrAu/exec", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res.result === "success") {
-          alert("Data berhasil dikirim!");
-          form.reset();
+      // Tambahkan data ke allData array
+      allData.push(data);
 
-          // reset tombol aktif
-          document.querySelectorAll('.goodbad button.active').forEach(btn => btn.classList.remove('active'));
-        } else {
-          alert("Error dari server: " + res.message);
-        }
-      })
-      .catch(err => {
-        alert("Gagal mengirim data: " + err.message);
-      });
+      alert("Data berhasil ditambahkan! Kamu bisa isi form lagi atau download semua data.");
+
+      // Reset form dan tombol aktif
+      form.reset();
+      document.querySelectorAll('.goodbad button.active, .shift-buttons button.active').forEach(btn => btn.classList.remove('active'));
     });
 
     document.getElementById('downloadExcel').addEventListener('click', function() {
-      const form = document.getElementById('pemeriksaanForm');
-      const data = Object.fromEntries(new FormData(form).entries());
+      if (allData.length === 0) {
+        alert("Belum ada data yang diinput.");
+        return;
+      }
 
-      // Buat array data untuk Excel
+      // Siapkan data array untuk Excel (header + semua data)
       const wsData = [
-        ["Field", "Value"], // header
-        ["Nama Operator", data.nama || ""],
-        ["Model Unit", data.model || ""],
-        ["Kode Unit", data.kode || ""],
-        ["HM Unit", data.hm || ""],
-        ["Tanggal", data.tanggal || ""],
-        ["Shift", data.shift || ""],
-        ["Pemeriksaan Track", data.track || ""],
-        ["Pemeriksaan Attachment", data.attachment || ""],
-        ["Pemeriksaan Engine", data.engine || ""],
-        ["Pemeriksaan Hydraulic", data.hydraulic || ""]
+        ["Nama Operator", "Model Unit", "Kode Unit", "HM Unit", "Tanggal", "Shift", "Pemeriksaan Track", "Pemeriksaan Attachment", "Pemeriksaan Engine", "Pemeriksaan Hydraulic"]
       ];
+
+      allData.forEach(item => {
+        wsData.push([
+          item.nama || "",
+          item.model || "",
+          item.kode || "",
+          item.hm || "",
+          item.tanggal || "",
+          item.shift || "",
+          item.track || "",
+          item.attachment || "",
+          item.engine || "",
+          item.hydraulic || ""
+        ]);
+      });
 
       // Buat workbook dan worksheet
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(wsData);
-      XLSX.utils.book_append_sheet(wb, ws, "Laporan");
+      XLSX.utils.book_append_sheet(wb, ws, "Laporan Semua Data");
 
       // Download file Excel
-      XLSX.writeFile(wb, "Laporan_Pemeriksaan_Operator.xlsx");
+      XLSX.writeFile(wb, "Laporan_Pemeriksaan_Operator_SemuaData.xlsx");
     });
 
     // Register service worker for PWA
