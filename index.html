@@ -2,181 +2,97 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Form Pemeriksaan Operator</title>
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon-192.png" />
+  <meta name="theme-color" content="#2196f3" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f5f5f5;
-      max-width: 600px;
-      margin: auto;
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    label {
-      margin-top: 15px;
-      display: block;
-      font-weight: bold;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    .group {
-      margin-top: 15px;
-    }
-    .btn-toggle {
-      display: flex;
-      justify-content: space-between;
-    }
-    .btn-toggle button {
-      width: 48%;
-      padding: 12px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .good { background-color: #28a745; color: white; }
-    .bad { background-color: #dc3545; color: white; }
-    .selected { outline: 3px solid black; }
-    #status {
-      margin-top: 20px;
-      text-align: center;
-      font-weight: bold;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+    h1 { color: #2196f3; }
+    label { display: block; margin-top: 10px; }
+    input, select, button { padding: 8px; width: 100%; margin-top: 5px; }
+    .goodbad { display: flex; justify-content: space-between; gap: 10px; }
+    .goodbad button { flex: 1; padding: 10px; }
   </style>
 </head>
 <body>
-  <h2>Form Pemeriksaan Operator</h2>
+  <h1>Form Pemeriksaan Operator</h1>
+  <form id="pemeriksaanForm">
+    <label>Nama Operator: <input type="text" name="nama" required /></label>
+    <label>Model Unit: <input type="text" name="model" required /></label>
+    <label>Kode Unit: <input type="text" name="kode" required /></label>
+    <label>HM Unit: <input type="number" name="hm" required /></label>
+    <label>Hari/Tanggal: <input type="date" name="tanggal" required /></label>
+    <label>Shift:
+      <select name="shift" required>
+        <option value="Pagi">Pagi</option>
+        <option value="Malam">Malam</option>
+      </select>
+    </label>
 
-  <label>Nama Operator</label>
-  <input type="text" id="nama" />
-
-  <label>Model Unit</label>
-  <input type="text" id="model" />
-
-  <label>Kode Unit</label>
-  <input type="text" id="kode" />
-
-  <label>HM Unit</label>
-  <input type="number" id="hm" />
-
-  <label>Hari/Tanggal</label>
-  <input type="date" id="tanggal" />
-
-  <label>Shift</label>
-  <select id="shift">
-    <option value="Pagi">Pagi</option>
-    <option value="Malam">Malam</option>
-  </select>
-
-  <div class="group">
-    <label>Pemeriksaan Track</label>
-    <div class="btn-toggle" id="track-group">
-      <button class="good" onclick="selectOption('track','Good', this)">Good</button>
-      <button class="bad" onclick="selectOption('track','Bad', this)">Bad</button>
+    <label>Pemeriksaan Track:</label>
+    <div class="goodbad">
+      <button type="button" onclick="setValue('track','Good')">Good</button>
+      <button type="button" onclick="setValue('track','Bad')">Bad</button>
     </div>
-  </div>
+    <input type="hidden" name="track" id="track" required />
 
-  <div class="group">
-    <label>Pemeriksaan Attachment</label>
-    <div class="btn-toggle" id="attachment-group">
-      <button class="good" onclick="selectOption('attachment','Good', this)">Good</button>
-      <button class="bad" onclick="selectOption('attachment','Bad', this)">Bad</button>
+    <label>Pemeriksaan Attachment:</label>
+    <div class="goodbad">
+      <button type="button" onclick="setValue('attachment','Good')">Good</button>
+      <button type="button" onclick="setValue('attachment','Bad')">Bad</button>
     </div>
-  </div>
+    <input type="hidden" name="attachment" id="attachment" required />
 
-  <div class="group">
-    <label>Pemeriksaan Engine</label>
-    <div class="btn-toggle" id="engine-group">
-      <button class="good" onclick="selectOption('engine','Good', this)">Good</button>
-      <button class="bad" onclick="selectOption('engine','Bad', this)">Bad</button>
+    <label>Pemeriksaan Engine:</label>
+    <div class="goodbad">
+      <button type="button" onclick="setValue('engine','Good')">Good</button>
+      <button type="button" onclick="setValue('engine','Bad')">Bad</button>
     </div>
-  </div>
+    <input type="hidden" name="engine" id="engine" required />
 
-  <div class="group">
-    <label>Pemeriksaan Hydraulic System</label>
-    <div class="btn-toggle" id="hydraulic-group">
-      <button class="good" onclick="selectOption('hydraulic','Good', this)">Good</button>
-      <button class="bad" onclick="selectOption('hydraulic','Bad', this)">Bad</button>
+    <label>Pemeriksaan Hydraulic System:</label>
+    <div class="goodbad">
+      <button type="button" onclick="setValue('hydraulic','Good')">Good</button>
+      <button type="button" onclick="setValue('hydraulic','Bad')">Bad</button>
     </div>
-  </div>
+    <input type="hidden" name="hydraulic" id="hydraulic" required />
 
-  <button onclick="kirimData()">Kirim ke Spreadsheet</button>
-  <div id="status"></div>
+    <button type="submit">Kirim ke Spreadsheet</button>
+  </form>
 
   <script>
-    let pemeriksaan = {
-      track: 'Good',
-      attachment: 'Good',
-      engine: 'Good',
-      hydraulic: 'Good'
-    };
-
-    function selectOption(field, value, el) {
-      pemeriksaan[field] = value;
-      document.querySelectorAll(`#${field}-group button`).forEach(btn => btn.classList.remove('selected'));
-      el.classList.add('selected');
+    function setValue(id, value) {
+      document.getElementById(id).value = value;
     }
 
-    function kirimData() {
-      const data = {
-        nama: document.getElementById("nama").value,
-        model: document.getElementById("model").value,
-        kode: document.getElementById("kode").value,
-        hm: document.getElementById("hm").value,
-        tanggal: document.getElementById("tanggal").value,
-        shift: document.getElementById("shift").value,
-        track: pemeriksaan.track,
-        attachment: pemeriksaan.attachment,
-        engine: pemeriksaan.engine,
-        hydraulic: pemeriksaan.hydraulic
-      };
+    document.getElementById('pemeriksaanForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = Object.fromEntries(new FormData(form).entries());
 
-    fetch("https://script.google.com/macros/s/AKfycbysCqI4Xt-m8PV3WkUJ3EN-FBdV1lG4Kzhl9lSnTjPcM4fw2kO8HG9OpyYArRRxYUhb/exec", {
-  method: "POST",
-  body: JSON.stringify(data),
-  headers: {
-    "Content-Type": "application/json"
-  }
-})
-
-
-
-        
-      .then(res => res.text())
-      .then(txt => {
-        document.getElementById("status").innerText = "Berhasil dikirim!";
-        document.getElementById("nama").value = "";
-        document.getElementById("model").value = "";
-        document.getElementById("kode").value = "";
-        document.getElementById("hm").value = "";
-        document.getElementById("tanggal").value = "";
+      fetch("https://script.google.com/macros/s/AKfycbysCqI4Xt-m8PV3WkUJ3EN-FBdV1lG4Kzhl9lSnTjPcM4fw2kO8HG9OpyYArRRxYUhb/exec", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json"
+        }
       })
-      .catch(err => {
-        document.getElementById("status").innerText = "Gagal mengirim: " + err;
-      });
-    }
+      .then(res => res.text())
+      .then(msg => {
+        alert("Berhasil dikirim: " + msg);
+        form.reset();
+      })
+      .catch(err => alert("Gagal mengirim: " + err));
+    });
+  </script>
 
-    // PWA - Service Worker Registration
+  <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('service-worker.js')
-          .then(function (registration) {
-            console.log('ServiceWorker terdaftar:', registration.scope);
-          }, function (err) {
-            console.log('ServiceWorker gagal:', err);
-          });
-      });
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('Service Worker registered', reg))
+        .catch(err => console.error('SW failed', err));
     }
   </script>
 </body>
