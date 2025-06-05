@@ -32,7 +32,7 @@
       font-size: 16px;
     }
     #downloadExcel {
-      background-color: #4caf50; /* hijau untuk beda tombol */
+      background-color: #4caf50;
       width: 100%;
     }
   </style>
@@ -89,19 +89,19 @@
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
   <script>
-    // Array untuk menyimpan semua data yang diinput
+    // Ganti dengan URL Web App Google Apps Script kamu
+    const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbxi29S-7QquVFHiPQZIiqBhOkTZuiUS-11dWFY0SMaUvph5fXtQYO97YoublthFGrAu/exec";
+
     const allData = [];
 
     function setValue(id, value, event) {
       document.getElementById(id).value = value;
 
-      // hapus kelas aktif dari semua tombol di grup yang sama
       const group = event.target.getAttribute('data-group');
       document.querySelectorAll(`button[data-group="${group}"]`).forEach(btn => {
         btn.classList.remove('active');
       });
 
-      // tambahkan kelas aktif pada tombol yang diklik
       event.target.classList.add('active');
     }
 
@@ -109,7 +109,6 @@
       e.preventDefault();
       const form = e.target;
 
-      // validasi hidden inputs
       const requiredFields = ['shift', 'track', 'attachment', 'engine', 'hydraulic'];
       for (const field of requiredFields) {
         if (!document.getElementById(field).value) {
@@ -118,13 +117,31 @@
         }
       }
 
-      // Ambil data dari form
       const data = Object.fromEntries(new FormData(form).entries());
 
-      // Tambahkan data ke allData array
+      // Tambah ke data lokal
       allData.push(data);
 
-      alert("Data berhasil ditambahkan! Kamu bisa isi form lagi atau download semua data.");
+      // Kirim ke Google Sheets via Apps Script
+
+      fetch("https://script.google.com/macros/s/AKfycbyTwgu7crDQTDfmLWYIatTA6k2IKoHRVPtanc88sWiyB5K1r2IO6SMtISfaqN4pYFOm/exec", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.result === "success") {
+          alert("Data berhasil ditambahkan dan dikirim ke Spreadsheet!");
+        } else {
+          alert("Error server saat kirim data: " + res.message);
+        }
+      })
+      .catch(err => {
+        alert("Gagal mengirim data ke Spreadsheet: " + err.message);
+      });
 
       // Reset form dan tombol aktif
       form.reset();
@@ -137,7 +154,6 @@
         return;
       }
 
-      // Siapkan data array untuk Excel (header + semua data)
       const wsData = [
         ["Nama Operator", "Model Unit", "Kode Unit", "HM Unit", "Tanggal", "Shift", "Pemeriksaan Track", "Pemeriksaan Attachment", "Pemeriksaan Engine", "Pemeriksaan Hydraulic"]
       ];
@@ -157,12 +173,10 @@
         ]);
       });
 
-      // Buat workbook dan worksheet
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(wsData);
       XLSX.utils.book_append_sheet(wb, ws, "Laporan Semua Data");
 
-      // Download file Excel
       XLSX.writeFile(wb, "Laporan_Pemeriksaan_Operator_SemuaData.xlsx");
     });
 
