@@ -18,13 +18,16 @@
       background-color: #2196f3;
       color: white;
     }
-    button[type="submit"] {
+    button[type="submit"], #downloadExcel {
       margin-top: 20px;
       background-color: #2196f3;
       color: white;
       border: none;
       cursor: pointer;
       font-size: 16px;
+    }
+    #downloadExcel {
+      background-color: #4caf50; /* hijau untuk beda tombol */
     }
   </style>
 </head>
@@ -73,7 +76,10 @@
     <input type="hidden" name="hydraulic" id="hydraulic" required />
 
     <button type="submit">Kirim ke Spreadsheet</button>
+    <button type="button" id="downloadExcel">Download Excel</button>
   </form>
+
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
   <script>
     function setValue(id, value, event) {
@@ -104,8 +110,7 @@
 
       const data = Object.fromEntries(new FormData(form).entries());
 
-      fetch("https://script.google.com/macros/s/AKfycbzJjnfg7YIsSjLcPGZ4klCI63DvKxJ29gS3mukKjMLzhTCU6ii-OuRSzAAp2KZB6A9g/exec", 
-        {
+      fetch("https://script.google.com/macros/s/AKfycbxi29S-7QquVFHiPQZIiqBhOkTZuiUS-11dWFY0SMaUvph5fXtQYO97YoublthFGrAu/exec", {
         method: "POST",
         body: JSON.stringify(data),
         headers: {
@@ -127,6 +132,34 @@
       .catch(err => {
         alert("Gagal mengirim data: " + err.message);
       });
+    });
+
+    document.getElementById('downloadExcel').addEventListener('click', function() {
+      const form = document.getElementById('pemeriksaanForm');
+      const data = Object.fromEntries(new FormData(form).entries());
+
+      // Buat array data untuk Excel
+      const wsData = [
+        ["Field", "Value"], // header
+        ["Nama Operator", data.nama || ""],
+        ["Model Unit", data.model || ""],
+        ["Kode Unit", data.kode || ""],
+        ["HM Unit", data.hm || ""],
+        ["Tanggal", data.tanggal || ""],
+        ["Shift", data.shift || ""],
+        ["Pemeriksaan Track", data.track || ""],
+        ["Pemeriksaan Attachment", data.attachment || ""],
+        ["Pemeriksaan Engine", data.engine || ""],
+        ["Pemeriksaan Hydraulic", data.hydraulic || ""]
+      ];
+
+      // Buat workbook dan worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      XLSX.utils.book_append_sheet(wb, ws, "Laporan");
+
+      // Download file Excel
+      XLSX.writeFile(wb, "Laporan_Pemeriksaan_Operator.xlsx");
     });
 
     // Register service worker for PWA
