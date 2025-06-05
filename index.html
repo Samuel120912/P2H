@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Form Pemeriksaan Operator</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icon-192.png" />
@@ -13,7 +13,19 @@
     label { display: block; margin-top: 10px; }
     input, select, button { padding: 8px; width: 100%; margin-top: 5px; }
     .goodbad { display: flex; justify-content: space-between; gap: 10px; }
-    .goodbad button { flex: 1; padding: 10px; }
+    .goodbad button { flex: 1; padding: 10px; cursor: pointer; border: 1px solid #2196f3; background: white; color: #2196f3; transition: 0.3s; }
+    .goodbad button.active {
+      background-color: #2196f3;
+      color: white;
+    }
+    button[type="submit"] {
+      margin-top: 20px;
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
@@ -26,6 +38,7 @@
     <label>Hari/Tanggal: <input type="date" name="tanggal" required /></label>
     <label>Shift:
       <select name="shift" required>
+        <option value="">-- Pilih Shift --</option>
         <option value="Pagi">Pagi</option>
         <option value="Malam">Malam</option>
       </select>
@@ -33,29 +46,29 @@
 
     <label>Pemeriksaan Track:</label>
     <div class="goodbad">
-      <button type="button" onclick="setValue('track','Good')">Good</button>
-      <button type="button" onclick="setValue('track','Bad')">Bad</button>
+      <button type="button" data-group="track" onclick="setValue('track', 'Good', event)">Good</button>
+      <button type="button" data-group="track" onclick="setValue('track', 'Bad', event)">Bad</button>
     </div>
     <input type="hidden" name="track" id="track" required />
 
     <label>Pemeriksaan Attachment:</label>
     <div class="goodbad">
-      <button type="button" onclick="setValue('attachment','Good')">Good</button>
-      <button type="button" onclick="setValue('attachment','Bad')">Bad</button>
+      <button type="button" data-group="attachment" onclick="setValue('attachment', 'Good', event)">Good</button>
+      <button type="button" data-group="attachment" onclick="setValue('attachment', 'Bad', event)">Bad</button>
     </div>
     <input type="hidden" name="attachment" id="attachment" required />
 
     <label>Pemeriksaan Engine:</label>
     <div class="goodbad">
-      <button type="button" onclick="setValue('engine','Good')">Good</button>
-      <button type="button" onclick="setValue('engine','Bad')">Bad</button>
+      <button type="button" data-group="engine" onclick="setValue('engine', 'Good', event)">Good</button>
+      <button type="button" data-group="engine" onclick="setValue('engine', 'Bad', event)">Bad</button>
     </div>
     <input type="hidden" name="engine" id="engine" required />
 
     <label>Pemeriksaan Hydraulic System:</label>
     <div class="goodbad">
-      <button type="button" onclick="setValue('hydraulic','Good')">Good</button>
-      <button type="button" onclick="setValue('hydraulic','Bad')">Bad</button>
+      <button type="button" data-group="hydraulic" onclick="setValue('hydraulic', 'Good', event)">Good</button>
+      <button type="button" data-group="hydraulic" onclick="setValue('hydraulic', 'Bad', event)">Bad</button>
     </div>
     <input type="hidden" name="hydraulic" id="hydraulic" required />
 
@@ -63,13 +76,32 @@
   </form>
 
   <script>
-    function setValue(id, value) {
+    function setValue(id, value, event) {
       document.getElementById(id).value = value;
+
+      // hapus kelas aktif dari semua tombol di grup yang sama
+      const group = event.target.getAttribute('data-group');
+      document.querySelectorAll(`button[data-group="${group}"]`).forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      // tambahkan kelas aktif pada tombol yang diklik
+      event.target.classList.add('active');
     }
 
     document.getElementById('pemeriksaanForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const form = e.target;
+
+      // validasi manual hidden inputs agar tidak kosong
+      const requiredFields = ['track', 'attachment', 'engine', 'hydraulic'];
+      for (const field of requiredFields) {
+        if (!document.getElementById(field).value) {
+          alert(`Harap pilih opsi untuk Pemeriksaan ${field.charAt(0).toUpperCase() + field.slice(1)}`);
+          return;
+        }
+      }
+
       const data = Object.fromEntries(new FormData(form).entries());
 
       fetch("https://script.google.com/macros/s/AKfycbysCqI4Xt-m8PV3WkUJ3EN-FBdV1lG4Kzhl9lSnTjPcM4fw2kO8HG9OpyYArRRxYUhb/exec", {
@@ -79,20 +111,28 @@
           "Content-Type": "application/json"
         }
       })
-      .then(res => res.text())
-      .then(msg => {
-        alert("Berhasil dikirim: " + msg);
-        form.reset();
-      })
-      .catch(err => alert("Gagal mengirim: " + err));
-    });
-  </script>
+      .then(res => res.json())
+      .then(res => {
+        if (res.result === "success") {
+          alert("Data berhasil dikirim!");
+          form.reset();
 
-  <script>
+          // reset tombol aktif
+          document.querySelectorAll('.goodbad button.active').forEach(btn => btn.classList.remove('active'));
+        } else {
+          alert("Error dari server: " + res.message);
+        }
+      })
+      .catch(err => {
+        alert("Gagal mengirim data: " + err.message);
+      });
+    });
+
+    // Register service worker for PWA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js')
         .then(reg => console.log('Service Worker registered', reg))
-        .catch(err => console.error('SW failed', err));
+        .catch(err => console.error('SW registration failed', err));
     }
   </script>
 </body>
